@@ -14,6 +14,8 @@ app = FastAPI(title="JuanSource API")
 
 def get_cors_origins() -> List[str]:
     default_origins = [
+        "https://juansource.mooo.com",
+        "http://juansource.mooo.com",
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:3000",

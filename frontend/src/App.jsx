@@ -13,7 +13,7 @@ import Logo from './assets/logo.png'
 
 import './index.css'
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8001'
+const API_BASE = (import.meta.env.VITE_API_BASE || '').trim() || (import.meta.env.PROD ? '/api' : 'http://localhost:8001')
 const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY ?? ''
 const getProgressSteps = (engine) => [
   'Sending claim to fact-checker…',
@@ -36,7 +36,10 @@ const describeBackendError = (raw) => {
   if (!raw) return 'The fact-checker is unavailable right now. Please try again shortly.'
   const lowered = raw.toLowerCase()
   if (lowered.includes('failed to fetch') || lowered.includes('networkerror')) {
-     return `Unable to reach the fact-checker at ${API_BASE}. Make sure the FastAPI server is running (uvicorn backend.app.main:app --reload), that it is listening on port 8001, and that no firewall/CORS rules block the request.`
+    if (import.meta.env.PROD) {
+      return `Unable to reach the fact-checker at ${API_BASE}. Verify your reverse proxy forwards /api to FastAPI and that CORS_ALLOW_ORIGINS includes https://juansource.mooo.com.`
+    }
+    return `Unable to reach the fact-checker at ${API_BASE}. Make sure the FastAPI server is running (uvicorn backend.app.main:app --reload), that it is listening on port 8001, and that no firewall/CORS rules block the request.`
   }
   if (lowered.includes('tavily_api_key') || lowered.includes('tavily')) {
     return 'Backend is missing Tavily credentials (set TAVILY_API_KEY).'
@@ -51,7 +54,7 @@ const describeBackendError = (raw) => {
     return 'Turnstile secret key is invalid or mismatched with your site key. Use keys from the same Turnstile widget.'
   }
   if (lowered.includes('hostname-mismatch')) {
-    return 'Turnstile hostname mismatch. Add localhost (and 127.0.0.1 if needed) to allowed hostnames in Cloudflare Turnstile settings.'
+    return 'Turnstile hostname mismatch. Add juansource.mooo.com for production and localhost/127.0.0.1 for local development in Cloudflare Turnstile settings.'
   }
   if (lowered.includes('timeout-or-duplicate') || lowered.includes('invalid-input-response')) {
     return 'Turnstile token expired or was already used. Please complete the challenge again and submit immediately.'

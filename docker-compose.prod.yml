@@ -33,15 +33,13 @@ services:
       RATE_LIMIT_TIMEZONE: Asia/Manila
       ANON_COOKIE_NAME: juansource_anon
       ANON_COOKIE_SECURE: "true"
-      CORS_ALLOW_ORIGINS: http://localhost:3000,http://127.0.0.1:3000
+      CORS_ALLOW_ORIGINS: https://juansource.mooo.com,http://juansource.mooo.com
       OLLAMA_BASE_URL: http://host.docker.internal:11434
     depends_on:
       db:
         condition: service_healthy
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    ports:
-      - "8001:8000"
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/docs', timeout=5)\""]
       interval: 15s
