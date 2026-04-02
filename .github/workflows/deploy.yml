@@ -1,4 +1,4 @@
-name: Deploy Repo 1
+name: Deploy JuanSource
 
 on:
   push:
