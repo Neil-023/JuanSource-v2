@@ -63,6 +63,7 @@ async def startup_event():
         print(f"Prompt guard initialization skipped: {exc}")
 
 @app.post("/fact-check", response_model=FactCheckResponse, dependencies=[Depends(enforce_prompt_guard)])
+@app.post("/api/fact-check", response_model=FactCheckResponse, dependencies=[Depends(enforce_prompt_guard)])
 async def fact_check_endpoint(request: ClaimRequest):
     result = run_fact_check(request.claim)
     if "error" in result:
@@ -71,6 +72,7 @@ async def fact_check_endpoint(request: ClaimRequest):
 
 
 @app.get("/session/bootstrap")
+@app.get("/api/session/bootstrap")
 async def session_bootstrap(request: Request, response: Response):
     anonymous_id = ensure_anonymous_cookie(request, response)
     return {"status": "ok", "anonymous_id": anonymous_id}
