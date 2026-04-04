@@ -2,13 +2,19 @@ services:
   db:
     image: pgvector/pgvector:pg16
     container_name: juansource-db
-    restart: unless-stopped
+    restart: always # Changed from unless-stopped for better auto-recovery
+    deploy:
+      resources:
+        limits:
+          memory: 256M # The "Safety Ceiling"
+        reservations:
+          memory: 128M # The "Guaranteed Minimum"
     environment:
       POSTGRES_DB: juansource
       POSTGRES_USER: juansource
       POSTGRES_PASSWORD: juansource
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432" # Secure: Only the server itself can talk to the DB
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./backend/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -22,7 +28,11 @@ services:
     build:
       context: ./backend
     container_name: juansource-backend
-    restart: unless-stopped
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 256M
     env_file:
       - ./backend/.env
     environment:
@@ -42,7 +52,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
-      - "8001:8000"
+      - "127.0.0.1:8001:8000" # Secure: Hide the backend from the public internet
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/docs', timeout=5)\""]
       interval: 15s
@@ -53,14 +63,18 @@ services:
     build:
       context: ./frontend
       args:
-        VITE_API_BASE: http://localhost:8001
+        VITE_API_BASE: /api # Fixed: No more localhost hardcoded!
     container_name: juansource-frontend
-    restart: unless-stopped
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 256M
     depends_on:
       backend:
         condition: service_healthy
     ports:
-      - "5173:80"
+      - "127.0.0.1:5173:80" # Secure: Pass through Nginx only
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1/healthz || exit 1"]
       interval: 15s

@@ -47,18 +47,39 @@ docker compose down
 
 Use the production compose file to run the production-ready stack with an edge Nginx container.
 
-1. Start production services.
+1. Build frontend assets locally or in CI (not on the server).
 
 ```
-docker compose -f docker-compose.prod.yml up --build -d
+cd frontend
+npm ci
+npm run build
 ```
 
-2. Open production endpoints.
+2. Build and publish the runtime-only frontend image.
+
+```
+docker build -f frontend/Dockerfile.prod -t juansource-frontend:prod frontend
+```
+
+3. Start production services on the server.
+
+```
+docker compose -f docker-compose.prod.yml up -d
+```
+
+If your server should pull a registry image, set JUANSOURCE_FRONTEND_IMAGE before running compose.
+
+```
+export JUANSOURCE_FRONTEND_IMAGE=ghcr.io/your-org/juansource-frontend:prod
+docker compose -f docker-compose.prod.yml up -d
+```
+
+4. Open production endpoints.
 
 - Frontend (Nginx): http://localhost:3000
 - Backend (FastAPI): http://localhost:8001/docs
 
-3. Stop production services.
+5. Stop production services.
 
 ```
 docker compose -f docker-compose.prod.yml down

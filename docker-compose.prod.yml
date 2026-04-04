@@ -2,7 +2,16 @@ services:
   db:
     image: pgvector/pgvector:pg16
     container_name: juansource-db-prod
-    restart: unless-stopped
+    restart: always
+    mem_limit: 220m
+    mem_reservation: 120m
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+    ports:
+      - "127.0.0.1:5432:5432"
     environment:
       POSTGRES_DB: juansource
       POSTGRES_USER: juansource
@@ -12,15 +21,24 @@ services:
       - ./backend/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U juansource -d juansource"]
-      interval: 10s
+      interval: 30s
       timeout: 5s
-      retries: 6
+      retries: 4
 
   backend:
     build:
       context: ./backend
     container_name: juansource-backend-prod
-    restart: unless-stopped
+    restart: always
+    mem_limit: 280m
+    mem_reservation: 160m
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+    ports:
+      - "127.0.0.1:8001:8000"
     env_file:
       - ./backend/.env
     environment:
@@ -42,32 +60,45 @@ services:
       - "host.docker.internal:host-gateway"
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/docs', timeout=5)\""]
-      interval: 15s
+      interval: 30s
       timeout: 5s
-      retries: 5
+      retries: 4
 
   frontend:
-    build:
-      context: ./frontend
-      args:
-        VITE_API_BASE: /api
+    image: ${JUANSOURCE_FRONTEND_IMAGE:-juansource-frontend:prod}
     container_name: juansource-frontend-prod
-    restart: unless-stopped
+    restart: always
+    mem_limit: 96m
+    mem_reservation: 48m
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+    ports:
+      - "127.0.0.1:5173:80"
     depends_on:
       backend:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1/healthz || exit 1"]
-      interval: 15s
+      interval: 30s
       timeout: 5s
-      retries: 5
+      retries: 4
 
   nginx:
     image: nginx:1.27-alpine
     container_name: juansource-nginx-prod
-    restart: unless-stopped
+    restart: always
+    mem_limit: 64m
+    mem_reservation: 32m
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
     ports:
-      - "3000:80"
+      - "127.0.0.1:3000:80"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
@@ -77,9 +108,9 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1/healthz || exit 1"]
-      interval: 15s
+      interval: 30s
       timeout: 5s
-      retries: 5
+      retries: 4
 
 volumes:
   pgdata:
