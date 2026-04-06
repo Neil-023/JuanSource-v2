@@ -52,7 +52,6 @@ services:
       ANON_COOKIE_NAME: juansource_anon
       ANON_COOKIE_SECURE: "true"
       ANON_COOKIE_SAMESITE: "none"
-      CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS}
       OLLAMA_BASE_URL: http://host.docker.internal:11434
     depends_on:
       db:
