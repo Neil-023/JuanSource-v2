@@ -256,9 +256,12 @@ export default function App() {
         'expired-callback': () => {
           setTurnstileToken('')
         },
-        'error-callback': () => {
+        'error-callback': (errorCode) => {
           setTurnstileToken('')
-          setSubmitError('Human verification failed. Please retry the challenge.')
+          const codeText = errorCode ? ` (${errorCode})` : ''
+          setSubmitError(
+            `Human verification failed${codeText}. Current origin is ${ACTIVE_FRONTEND_ORIGIN}. In Cloudflare Turnstile Hostname Management, allow this hostname.`
+          )
         },
       })
     }
