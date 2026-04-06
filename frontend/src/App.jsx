@@ -13,7 +13,10 @@ import Logo from './assets/logo.png'
 
 import './index.css'
 
-const API_BASE = (import.meta.env.VITE_API_BASE || '').trim() || (import.meta.env.PROD ? '/api' : 'http://localhost:8001')
+const RAW_API_BASE = (import.meta.env.VITE_API_BASE || '').trim().replace(/\/+$/, '')
+const DEFAULT_PROD_API_BASE = 'https://juansource.mooo.com/api'
+const API_BASE = RAW_API_BASE || (import.meta.env.PROD ? DEFAULT_PROD_API_BASE : 'http://localhost:8001')
+const ACTIVE_FRONTEND_ORIGIN = typeof window !== 'undefined' ? window.location.origin : 'your frontend origin'
 const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY ?? ''
 const getProgressSteps = (engine) => [
   'Sending claim to fact-checker…',
@@ -37,7 +40,7 @@ const describeBackendError = (raw) => {
   const lowered = raw.toLowerCase()
   if (lowered.includes('failed to fetch') || lowered.includes('networkerror')) {
     if (import.meta.env.PROD) {
-      return `Unable to reach the fact-checker at ${API_BASE}. Verify your reverse proxy forwards /api to FastAPI and that CORS_ALLOW_ORIGINS includes https://juansource.mooo.com.`
+      return `Unable to reach the fact-checker at ${API_BASE}. Verify your reverse proxy forwards /api to FastAPI and that CORS_ALLOW_ORIGINS includes ${ACTIVE_FRONTEND_ORIGIN}.`
     }
     return `Unable to reach the fact-checker at ${API_BASE}. Make sure the FastAPI server is running (uvicorn backend.app.main:app --reload), that it is listening on port 8001, and that no firewall/CORS rules block the request.`
   }
@@ -96,7 +99,7 @@ function FinalResultCard({ headline, reasoning, verdict, evidence }) {
           <div className="flex justify-center mb-4">
             <div
               className={`inline-block px-4 py-1 rounded-md text-sm font-semibold ${
-                isVerified ? 'bg-[#DEFFC4] text-[#5CC10E] dark:bg-[#17270A] text-[#5CC10E]' : 'bg-[#FFC4C4] text-[#FF3737] dark:bg-[#270A0A] text-[#270A0A]'
+                isVerified ? 'bg-[#DEFFC4] text-[#5CC10E] dark:bg-[#17270A]' : 'bg-[#FFC4C4] text-[#FF3737] dark:bg-[#270A0A] dark:text-[#FFB0B0]'
               }`}
             >
               {isVerified ? 'Real Claim' : 'Fake Claim'}

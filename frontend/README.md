@@ -1,16 +1,46 @@
-# React + Vite
+# JuanSource Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite frontend for JuanSource. In production, this app is intended to be hosted on GitHub Pages while backend + database stay on your server.
 
-Currently, two official plugins are available:
+## Local Development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```bash
+npm install
+npm run dev
+```
 
-## React Compiler
+Default local API behavior:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Uses `VITE_API_BASE` when provided.
+- Otherwise falls back to `http://localhost:8001` in development.
 
-## Expanding the ESLint configuration
+## Production Build For GitHub Pages
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Build with environment variables:
+
+```bash
+# PowerShell example
+$env:VITE_API_BASE="https://juansource.mooo.com/api"
+$env:VITE_BASE_PATH="/JuanSource/"
+$env:VITE_TURNSTILE_SITE_KEY="your_turnstile_site_key_here"
+npm run build
+```
+
+`VITE_BASE_PATH` rules:
+
+- Use `/` for `username.github.io` root site.
+- Use `/<repo-name>/` for project pages.
+
+## Publish To GitHub Pages
+
+```bash
+npm run deploy
+```
+
+## Required Backend CORS
+
+On the server, set `CORS_ALLOW_ORIGINS` to include your GitHub Pages origin, for example:
+
+```text
+https://juansource.mooo.com,https://your-username.github.io
+```

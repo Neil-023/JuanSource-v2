@@ -45,45 +45,68 @@ docker compose down
 
 ## Production Docker Profile
 
-Use the production compose file to run the production-ready stack with an edge Nginx container.
+Use split deployment in production:
 
-1. Build frontend assets locally or in CI (not on the server).
+- Frontend: GitHub Pages
+- Backend API + database: production server via Docker Compose
 
-```
-cd frontend
-npm ci
-npm run build
-```
+1. Configure backend env in GitHub secret `JUANSOURCE_BACKEND_ENV`.
 
-2. Build and publish the runtime-only frontend image.
+Required note:
 
-```
-docker build -f frontend/Dockerfile.prod -t juansource-frontend:prod frontend
-```
+- Include your GitHub Pages origin in `CORS_ALLOW_ORIGINS` (for example `https://juansource.mooo.com,https://your-username.github.io`).
+- Keep `ANON_COOKIE_SECURE=true` and `ANON_COOKIE_SAMESITE=none` in production so prompt-guard cookies work cross-origin from GitHub Pages.
 
-3. Start production services on the server.
+2. Start production services on the server.
 
 ```
 docker compose -f docker-compose.prod.yml up -d
 ```
 
-If your server should pull a registry image, set JUANSOURCE_FRONTEND_IMAGE before running compose.
+3. Open production endpoints.
 
-```
-export JUANSOURCE_FRONTEND_IMAGE=ghcr.io/your-org/juansource-frontend:prod
-docker compose -f docker-compose.prod.yml up -d
-```
+- API reverse proxy (Nginx): http://localhost:3000/api
+- Backend container (FastAPI): http://localhost:8001/docs
+- Frontend app: GitHub Pages URL
 
-4. Open production endpoints.
-
-- Frontend (Nginx): http://localhost:3000
-- Backend (FastAPI): http://localhost:8001/docs
-
-5. Stop production services.
+4. Stop production services.
 
 ```
 docker compose -f docker-compose.prod.yml down
 ```
+
+### Frontend GitHub Pages Deployment
+
+Deploy only the `frontend/` app to GitHub Pages:
+
+1. Install dependencies:
+
+```bash
+cd frontend
+npm install
+```
+
+2. Build with production API + base path:
+
+```bash
+# PowerShell example (replace values)
+$env:VITE_API_BASE="https://juansource.mooo.com/api"
+$env:VITE_BASE_PATH="/JuanSource/"
+$env:VITE_TURNSTILE_SITE_KEY="your_turnstile_site_key_here"
+npm run build
+```
+
+3. Publish:
+
+```bash
+npm run deploy
+```
+
+Notes:
+
+- Set `VITE_BASE_PATH=/` when deploying to `username.github.io` root, or `/<repo-name>/` for project pages.
+- Keep backend and PostgreSQL only on your server using `docker-compose.prod.yml`.
+- `CORS_ALLOW_ORIGINS` must include the exact GitHub Pages origin used by this frontend build.
 
 ### Semantic Cache (Gemini endpoint)
 

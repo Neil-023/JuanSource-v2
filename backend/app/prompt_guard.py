@@ -59,6 +59,13 @@ def _cookie_ttl_seconds() -> int:
         return 180 * 86400
 
 
+def _cookie_samesite() -> str:
+    raw = os.getenv("ANON_COOKIE_SAMESITE", "lax").strip().lower()
+    if raw in {"none", "strict", "lax"}:
+        return raw
+    return "lax"
+
+
 def _turnstile_secret() -> str:
     return os.getenv("TURNSTILE_SECRET_KEY", "").strip()
 
@@ -102,7 +109,7 @@ def _resolve_or_set_anonymous_id(request: Request, response: Response) -> str:
         value=_sign_value(anonymous_id),
         httponly=True,
         secure=_cookie_secure(),
-        samesite="lax",
+        samesite=_cookie_samesite(),
         max_age=_cookie_ttl_seconds(),
         path="/",
     )
