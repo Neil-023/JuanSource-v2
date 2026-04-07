@@ -38,7 +38,7 @@ app.add_middleware(
 
 
 @app.get("/health")
-@app.get("/api/health")
+@app.get("/api/health", methods=["GET, HEAD"])
 async def health_check():
     return {"status": "online", "server": "oracle-amd-1gb"}
 
