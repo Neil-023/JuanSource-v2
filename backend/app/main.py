@@ -36,6 +36,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+@app.get("/health")
+@app.get("/api/health")
+async def health_check():
+    return {"status": "online", "server": "oracle-amd-1gb"}
+
 # Pydantic model to define the structure of the request body
 class ClaimRequest(BaseModel):
     claim: str

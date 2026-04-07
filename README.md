@@ -69,6 +69,35 @@ docker compose -f docker-compose.prod.yml up -d
 - Backend container (FastAPI): http://localhost:8001/docs
 - Frontend app: GitHub Pages URL
 
+### UptimeRobot External Heartbeat (Recommended)
+
+Use UptimeRobot to generate real external traffic and receive downtime alerts.
+
+1. Health endpoint
+
+- API health URL: `https://juansource.mooo.com/api/health`
+- Expected JSON response:
+
+```json
+{"status":"online","server":"oracle-amd-1gb"}
+```
+
+2. UptimeRobot monitor settings
+
+- Monitor type: `HTTP(s)`
+- Friendly name: `JuanSource API` (or `FoodHub API`)
+- URL: `https://juansource.mooo.com/api/health`
+- Interval: `5 minutes`
+- Alert contact: your email (enabled)
+
+3. Verify requests are reaching Nginx
+
+```bash
+sudo tail -f /var/log/nginx/access.log
+```
+
+You should see UptimeRobot requests hitting `/api/health` with status `200`.
+
 4. Stop production services.
 
 ```
