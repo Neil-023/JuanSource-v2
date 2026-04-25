@@ -214,7 +214,7 @@ def run_fact_check(claim: str):
         print("3. Evidence retrieved.")
     except Exception as e:
         print(f"Error during Tavily Search: {e}")
-        return {"error": str(e)}
+        return {"error": "Internal Service Error"}
 
     try:
         llm = _ensure_llm()
@@ -244,4 +244,4 @@ def run_fact_check(claim: str):
         return result
     except Exception as e:
         print(f"Error during Gemini Reasoning: {e}")
-        return {"error": str(e)}
+        return {"error": "Internal Service Error"}
