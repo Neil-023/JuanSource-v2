@@ -303,7 +303,7 @@ def run_fact_check(claim: str):
         print(f"3. Evidence retrieved. Found {len(search_results) if isinstance(search_results, list) else 'N/A'} results.")
     except Exception as e:
         print(f"Error during Tavily Search: {e}")
-        return {"error": str(e)}
+        return {"error": "Internal Service Error"}
 
     try:
         llm = _ensure_llm()
@@ -353,13 +353,4 @@ def run_fact_check(claim: str):
         print(f"❌ Error during LLM Reasoning: {error_msg}")
         print(f"   Error type: {type(e).__name__}")
         
-        if "Connection" in error_msg or "timeout" in error_msg.lower() or "refused" in error_msg.lower():
-            return {
-                "error": f"Failed to connect to Ollama. Make sure Ollama is running and the model '{os.getenv('OLLAMA_MODEL', 'llama3.1:8b')}' is pulled. Error: {error_msg}"
-            }
-        if "404" in error_msg or "not found" in error_msg.lower():
-            model_name = os.getenv('OLLAMA_MODEL', 'llama3.1:8b')
-            return {
-                "error": f"Model '{model_name}' not found. Please pull it first: 'ollama pull {model_name}'"
-            }
-        return {"error": f"LLM processing error: {error_msg}"}
+        return {"error": "Internal Service Error"}
