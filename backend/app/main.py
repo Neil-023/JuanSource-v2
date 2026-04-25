@@ -41,7 +41,7 @@ app.add_middleware(
 @app.api_route("/health", methods=["GET", "HEAD"])
 @app.api_route("/api/health", methods=["GET", "HEAD"])
 async def health_check():
-    return {"status": "online", "server": "oracle-amd-1gb"}
+    return {"status": "online"}
 
 # Pydantic model to define the structure of the request body
 class ClaimRequest(BaseModel):
